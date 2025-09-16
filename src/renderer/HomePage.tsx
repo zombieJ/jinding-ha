@@ -1,18 +1,21 @@
-import React, { useEffect } from 'react';
-import { Form, Input, Button, Card, Typography, App } from 'antd';
-import { HomeOutlined } from '@ant-design/icons';
+import React, { useEffect, useContext } from 'react';
+import { Form, Input, Button, Card, Typography, App, Tooltip } from 'antd';
+import { HomeOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { HAContext } from './useHA';
+import { useNavigate } from 'react-router-dom';
 
 const { Title } = Typography;
 
 interface HomeAssistantFormValues {
   address: string;
-  username: string;
-  password: string;
+  token: string;
 }
 
 const HomePage: React.FC = () => {
   const { message, notification } = App.useApp();
   const [form] = Form.useForm();
+  const haInstance = useContext(HAContext);
+  const navigate = useNavigate();
 
   // 组件加载时从localStorage读取数据
   useEffect(() => {
@@ -28,35 +31,24 @@ const HomePage: React.FC = () => {
   }, [form]);
 
   // 表单数据变化时保存到localStorage
-  const onValuesChange = (changedValues: Partial<HomeAssistantFormValues>, allValues: HomeAssistantFormValues) => {
+  const onValuesChange = (
+    changedValues: Partial<HomeAssistantFormValues>,
+    allValues: HomeAssistantFormValues,
+  ) => {
     localStorage.setItem('homeAssistantConfig', JSON.stringify(allValues));
   };
 
   // 登录验证函数
   const loginToHomeAssistant = async (values: HomeAssistantFormValues) => {
     try {
-      // 构造登录API URL
-      const loginUrl = `${values.address}/api/login`;
-      
-      // 发送登录请求
-      const response = await fetch(loginUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: values.username,
-          password: values.password,
-        }),
-      });
-
-      if (response.ok) {
-        // 登录成功，显示成功消息
+      // 使用useHA context的login方法
+      if (haInstance) {
+        haInstance.login(values.address, values.token);
         message.success('成功连接到 Home Assistant!');
-        // 这里可以添加登录成功后的逻辑，比如跳转到其他页面或保存认证信息
+        // 登录成功后跳转到设置页面
+        navigate('/setup');
       } else {
-        // 登录失败，显示错误信息
-        message.error('登录失败，请检查您的凭据和地址。');
+        message.error('Home Assistant实例未正确初始化');
       }
     } catch (error) {
       // 网络错误或其他异常
@@ -67,24 +59,33 @@ const HomePage: React.FC = () => {
 
   const onFinish = (values: HomeAssistantFormValues) => {
     console.log('Home Assistant Address:', values.address);
-    console.log('Username:', values.username);
-    console.log('Password:', values.password);
+    console.log('Token:', values.token);
     // 调用登录验证函数
     loginToHomeAssistant(values);
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '100vh'
-    }}>
-      <Card style={{ width: 400, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+      }}
+    >
+      <Card
+        style={{
+          width: 400,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        }}
+      >
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <HomeOutlined style={{ fontSize: 48, color: '#1890ff' }} />
-          <Title level={3} style={{ marginTop: 16, marginBottom: 0 }}>Home Assistant 配置</Title>
-          <p style={{ color: '#888' }}>请输入您的 Home Assistant 地址和账户信息</p>
+          <Title level={3} style={{ marginTop: 16, marginBottom: 0 }}>
+            Home Assistant 配置
+          </Title>
+          <p style={{ color: '#888' }}>请输入您的 Home Assistant 地址和令牌</p>
         </div>
 
         <Form
@@ -101,25 +102,36 @@ const HomePage: React.FC = () => {
             rules={[
               {
                 required: true,
-                message: '请输入 Home Assistant 的地址!'
+                message: '请输入 Home Assistant 的地址!',
               },
               {
                 pattern: /^(http|https):\/\/(\d{1,3}\.){3}\d{1,3}:\d{1,5}$/,
-                message: '请输入有效的地址格式，例如: http://192.168.50.116:8123'
+                message:
+                  '请输入有效的地址格式，例如: http://192.168.50.116:8123',
               },
               {
                 validator: (_, value) => {
                   if (value) {
                     // 检查是否以 http 或 https 开头
-                    if (!value.startsWith('http://') && !value.startsWith('https://')) {
-                      return Promise.reject('地址必须以 http:// 或 https:// 开头');
+                    if (
+                      !value.startsWith('http://') &&
+                      !value.startsWith('https://')
+                    ) {
+                      return Promise.reject(
+                        '地址必须以 http:// 或 https:// 开头',
+                      );
                     }
 
                     // 提取主机和端口部分
-                    const urlWithoutProtocol = value.replace(/^(http|https):\/\//, '');
+                    const urlWithoutProtocol = value.replace(
+                      /^(http|https):\/\//,
+                      '',
+                    );
                     const parts = urlWithoutProtocol.split(':');
                     if (parts.length !== 2) {
-                      return Promise.reject('请输入有效的地址格式，例如: http://192.168.50.116:8123');
+                      return Promise.reject(
+                        '请输入有效的地址格式，例如: http://192.168.50.116:8123',
+                      );
                     }
 
                     const ip = parts[0];
@@ -144,8 +156,8 @@ const HomePage: React.FC = () => {
                     }
                   }
                   return Promise.resolve();
-                }
-              }
+                },
+              },
             ]}
           >
             <Input
@@ -155,34 +167,21 @@ const HomePage: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            name="username"
-            label="用户名"
+            name="token"
+            label="令牌"
+            tooltip="HA界面：左下角进入个人页面 > 右上方点击安全 tab > 滚动到最下面点击创建令牌"
             rules={[
               {
                 required: true,
-                message: '请输入用户名!'
-              }
+                message: '请输入令牌!',
+              },
             ]}
           >
-            <Input
-              placeholder="请输入用户名"
+            <Input.TextArea
+              placeholder="请输入令牌"
               size="large"
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            label="密码"
-            rules={[
-              {
-                required: true,
-                message: '请输入密码!'
-              }
-            ]}
-          >
-            <Input.Password
-              placeholder="请输入密码"
-              size="large"
+              rows={3}
+              style={{ resize: 'vertical' }}
             />
           </Form.Item>
 

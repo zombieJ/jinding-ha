@@ -58,7 +58,8 @@ const installExtensions = async () => {
 
 const createWindow = async () => {
   if (isDebug) {
-    await installExtensions();
+    // TODO: 网络不好，加载不了。解决这个问题。
+    // await installExtensions();
   }
 
   const RESOURCES_PATH = app.isPackaged
@@ -75,6 +76,7 @@ const createWindow = async () => {
     height: 728,
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      webSecurity: false, // 禁用web安全策略以解决CORS问题
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
