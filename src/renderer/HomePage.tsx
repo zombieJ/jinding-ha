@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Form, Input, Button, Card, Typography } from 'antd';
+import { Form, Input, Button, Card, Typography, App } from 'antd';
 import { HomeOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
@@ -11,6 +11,7 @@ interface HomeAssistantFormValues {
 }
 
 const HomePage: React.FC = () => {
+  const { message, notification } = App.useApp();
   const [form] = Form.useForm();
 
   // 组件加载时从localStorage读取数据
@@ -31,11 +32,45 @@ const HomePage: React.FC = () => {
     localStorage.setItem('homeAssistantConfig', JSON.stringify(allValues));
   };
 
+  // 登录验证函数
+  const loginToHomeAssistant = async (values: HomeAssistantFormValues) => {
+    try {
+      // 构造登录API URL
+      const loginUrl = `${values.address}/api/login`;
+      
+      // 发送登录请求
+      const response = await fetch(loginUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: values.username,
+          password: values.password,
+        }),
+      });
+
+      if (response.ok) {
+        // 登录成功，显示成功消息
+        message.success('成功连接到 Home Assistant!');
+        // 这里可以添加登录成功后的逻辑，比如跳转到其他页面或保存认证信息
+      } else {
+        // 登录失败，显示错误信息
+        message.error('登录失败，请检查您的凭据和地址。');
+      }
+    } catch (error) {
+      // 网络错误或其他异常
+      message.error('连接过程中发生错误，请检查网络连接和地址。');
+      console.error('Login error:', error);
+    }
+  };
+
   const onFinish = (values: HomeAssistantFormValues) => {
     console.log('Home Assistant Address:', values.address);
     console.log('Username:', values.username);
     console.log('Password:', values.password);
-    // 这里可以添加提交地址的逻辑
+    // 调用登录验证函数
+    loginToHomeAssistant(values);
   };
 
   return (
