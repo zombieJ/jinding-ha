@@ -43,7 +43,7 @@ function HomePage(): JSX.Element {
     try {
       // 使用useHA context的login方法
       if (haInstance) {
-        haInstance.login(values.address, values.token);
+        await haInstance.login(values.address, values.token);
         message.success('成功连接到 Home Assistant!');
         // 登录成功后跳转到设置页面
         navigate('/setup');

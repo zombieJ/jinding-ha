@@ -41,9 +41,11 @@ export default function useHA(): Instance {
               response.status,
               response.statusText,
             );
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
           }
         } catch (error) {
           console.error('Error fetching Home Assistant config:', error);
+          throw error;
         }
       },
 
