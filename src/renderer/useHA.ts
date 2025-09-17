@@ -4,6 +4,7 @@ import React from 'react';
 export interface Instance {
   login: (host: string, token: string) => Promise<void>;
   getDevices: () => Promise<HADevice[]>;
+  getEntities: () => Promise<any>;
 }
 
 /** Home Assistant Device */
@@ -94,6 +95,35 @@ export default function useHA(): Instance {
           }
         } catch (error) {
           console.error('Error fetching Home Assistant devices:', error);
+          return [];
+        }
+      },
+
+      getEntities: async () => {
+        const url = `${urlRef.current.host}/api/states`;
+
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${urlRef.current.token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            const entities = await response.json();
+            return entities;
+          } else {
+            console.error(
+              'Failed to fetch Home Assistant entities:',
+              response.status,
+              response.statusText,
+            );
+            return [];
+          }
+        } catch (error) {
+          console.error('Error fetching Home Assistant entities:', error);
           return [];
         }
       },
