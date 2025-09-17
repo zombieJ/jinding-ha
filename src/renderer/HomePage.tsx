@@ -1,8 +1,8 @@
-import React, { useEffect, useContext } from 'react';
-import { Form, Input, Button, Card, Typography, App, Tooltip } from 'antd';
-import { HomeOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import { HAContext } from './useHA';
+import React, { useEffect, useContext, JSX } from 'react';
+import { Form, Input, Button, Card, Typography, App } from 'antd';
+import { HomeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { HAContext } from './useHA';
 
 const { Title } = Typography;
 
@@ -11,8 +11,8 @@ interface HomeAssistantFormValues {
   token: string;
 }
 
-const HomePage: React.FC = () => {
-  const { message, notification } = App.useApp();
+function HomePage(): JSX.Element {
+  const { message } = App.useApp();
   const [form] = Form.useForm();
   const haInstance = useContext(HAContext);
   const navigate = useNavigate();
@@ -118,7 +118,7 @@ const HomePage: React.FC = () => {
                       !value.startsWith('https://')
                     ) {
                       return Promise.reject(
-                        '地址必须以 http:// 或 https:// 开头',
+                        new Error('地址必须以 http:// 或 https:// 开头'),
                       );
                     }
 
@@ -130,7 +130,9 @@ const HomePage: React.FC = () => {
                     const parts = urlWithoutProtocol.split(':');
                     if (parts.length !== 2) {
                       return Promise.reject(
-                        '请输入有效的地址格式，例如: http://192.168.50.116:8123',
+                        new Error(
+                          '请输入有效的地址格式，例如: http://192.168.50.116:8123',
+                        ),
                       );
                     }
 
@@ -140,19 +142,25 @@ const HomePage: React.FC = () => {
                     // 验证IP地址
                     const ipParts = ip.split('.');
                     if (ipParts.length !== 4) {
-                      return Promise.reject('请输入有效的IP地址');
+                      return Promise.reject(new Error('请输入有效的IP地址'));
                     }
-                    for (const part of ipParts) {
-                      const num = parseInt(part);
-                      if (isNaN(num) || num < 0 || num > 255) {
-                        return Promise.reject('请输入有效的IP地址');
+                    ipParts.forEach((part: any) => {
+                      const num = parseInt(part, 10);
+                      if (Number.isNaN(num) || num < 0 || num > 255) {
+                        return Promise.reject(new Error('请输入有效的IP地址'));
                       }
-                    }
+                    });
 
                     // 验证端口
-                    const portNum = parseInt(port);
-                    if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
-                      return Promise.reject('端口号必须在 1-65535 之间');
+                    const portNum = parseInt(port, 10);
+                    if (
+                      Number.isNaN(portNum) ||
+                      portNum < 1 ||
+                      portNum > 65535
+                    ) {
+                      return Promise.reject(
+                        new Error('端口号必须在 1-65535 之间'),
+                      );
                     }
                   }
                   return Promise.resolve();
@@ -199,6 +207,6 @@ const HomePage: React.FC = () => {
       </Card>
     </div>
   );
-};
+}
 
 export default HomePage;

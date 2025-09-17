@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { JSX, useContext } from 'react';
 import {
   Timeline,
   Typography,
@@ -10,11 +10,11 @@ import {
 } from 'antd';
 import { SettingOutlined, WifiOutlined } from '@ant-design/icons';
 import { HAContext } from './useHA';
-import { useContext } from 'react';
+// 将 import { useContext } from 'react'; 移到合适位置，这里已在文件开头导入了 react，无需重复导入，此句可移除
 
 const { Title } = Typography;
 
-const SetupPage: React.FC = () => {
+function SetupPage(): JSX.Element {
   const haInstance = useContext(HAContext);
 
   const handleGetDevices = async () => {
@@ -87,6 +87,6 @@ const SetupPage: React.FC = () => {
       </Card>
     </div>
   );
-};
+}
 
 export default SetupPage;
