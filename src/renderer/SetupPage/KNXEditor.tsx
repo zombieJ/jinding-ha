@@ -1,12 +1,8 @@
 import React, { useEffect } from 'react';
 import { Form, Input, Button, Flex, Typography, Divider, Alert } from 'antd';
+import { KNXItem } from './types';
 
-function toKNXText(
-  list: {
-    name: string;
-    address: string;
-  }[] = [],
-) {
+function toKNXText(list: KNXItem[] = []) {
   return `
 knx:
   light:
@@ -24,8 +20,14 @@ ${list
 `.trim();
 }
 
-const KNXEditor: React.FC = () => {
+export interface KNXEditorProps {
+  onKNXChange?: (items: KNXItem[]) => void;
+}
+
+const KNXEditor: React.FC<KNXEditorProps> = ({ onKNXChange }) => {
   const [form] = Form.useForm();
+
+  const items = Form.useWatch('knxItems', form);
 
   // 初始化时从 localStorage 加载数据
   useEffect(() => {
@@ -39,6 +41,12 @@ const KNXEditor: React.FC = () => {
       }
     }
   }, [form]);
+
+  useEffect(() => {
+    if (onKNXChange) {
+      onKNXChange(items);
+    }
+  }, [items, onKNXChange]);
 
   // 表单数据变化时保存到 localStorage
   const handleValuesChange = () => {

@@ -3,20 +3,27 @@ import { Card, Steps, Row, Col, Alert } from 'antd';
 import { SettingOutlined, WifiOutlined } from '@ant-design/icons';
 import KNXEditor from './KNXEditor';
 import MiBindEditor from './MiBindEditor';
+import { KNXItem } from './types';
 
 function SetupPage(): JSX.Element {
   const [currentStep, setCurrentStep] = useState(0);
+  const [knxList, setKnxList] = useState<KNXItem[]>([]);
 
   const handleStepChange = (step: number) => {
     setCurrentStep(step);
   };
 
+  const handleKNXChange = (items: KNXItem[]) => {
+    console.log('KNX 数据更新:', items);
+    setKnxList(items);
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return <KNXEditor />;
+        return <KNXEditor onKNXChange={handleKNXChange} />;
       case 1:
-        return <MiBindEditor />;
+        return <MiBindEditor knxItems={knxList} />;
       default:
         return null;
     }

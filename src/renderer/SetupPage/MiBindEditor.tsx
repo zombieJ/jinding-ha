@@ -3,10 +3,15 @@ import { HAContext, HADevice } from '../useHA';
 import { message, Spin, Tabs } from 'antd';
 import MiBindEditorDebugList from './MiBindEditorDebugList';
 import MiBindEditorMapper from './MiBindEditorMapper';
+import { KNXItem } from './types';
 
 const { TabPane } = Tabs;
 
-const MiBindEditor: React.FC = () => {
+interface MiBindEditorProps {
+  knxItems: KNXItem[];
+}
+
+const MiBindEditor: React.FC<MiBindEditorProps> = ({ knxItems }) => {
   const haInstance = useContext(HAContext);
   const [devices, setDevices] = useState<HADevice[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,7 +56,7 @@ const MiBindEditor: React.FC = () => {
       ) : (
         <Tabs>
           <TabPane tab="配对" key="0">
-            <MiBindEditorMapper devices={devices} />
+            <MiBindEditorMapper devices={devices} knxItems={knxItems} />
           </TabPane>
           <TabPane tab="调试" key="1">
             <MiBindEditorDebugList devices={devices} />

@@ -9,6 +9,7 @@ module.exports = {
     'import/extensions': 'off',
     'import/no-unresolved': 'off',
     'import/no-import-module-exports': 'off',
+    'import/order': 'off',
     'no-shadow': 'off',
     '@typescript-eslint/no-shadow': 'error',
     'no-unused-vars': 'off',
@@ -18,6 +19,7 @@ module.exports = {
     'react/jsx-props-no-spreading': 'off',
     'react-hooks/exhaustive-deps': 'off',
     'react/no-array-index-key': 'off',
+    'react/require-default-props': 'off',
   },
   parserOptions: {
     ecmaVersion: 2022,

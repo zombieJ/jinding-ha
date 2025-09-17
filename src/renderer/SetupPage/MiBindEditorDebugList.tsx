@@ -8,7 +8,9 @@ interface MiBindEditorDebugListProps {
   devices: HADevice[];
 }
 
-const MiBindEditorDebugList: React.FC<MiBindEditorDebugListProps> = ({ devices }) => {
+const MiBindEditorDebugList: React.FC<MiBindEditorDebugListProps> = ({
+  devices,
+}) => {
   return (
     <List
       dataSource={devices}
