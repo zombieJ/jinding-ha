@@ -1,8 +1,14 @@
 @import '~antd/dist/reset.css';
 
-body {
-  position: relative;
-  color: white;
+html {
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100vh;
   background: linear-gradient(
     200.96deg,
@@ -10,7 +16,6 @@ body {
     #dd5789 51.77%,
     #7a2c9e 129.35%
   );
-  font-family: sans-serif;
 }
 
 root {

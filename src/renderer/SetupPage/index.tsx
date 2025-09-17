@@ -1,45 +1,24 @@
-import React, { JSX, useContext } from 'react';
-import {
-  Timeline,
-  Typography,
-  Card,
-  Button,
-  Space,
-  Steps,
-  message,
-  Row,
-  Col,
-  Alert,
-} from 'antd';
+import React, { JSX, useState } from 'react';
+import { Card, Steps, Row, Col, Alert } from 'antd';
 import { SettingOutlined, WifiOutlined } from '@ant-design/icons';
-import { HAContext } from '../useHA';
 import KNXEditor from './KNXEditor';
-
-const { Title } = Typography;
+import MiBindEditor from './MiBindEditor';
 
 function SetupPage(): JSX.Element {
-  const haInstance = useContext(HAContext);
+  const [currentStep, setCurrentStep] = useState(0);
 
-  const handleGetDevices = async () => {
-    try {
-      if (haInstance) {
-        const devices = await haInstance.getDevices();
+  const handleStepChange = (step: number) => {
+    setCurrentStep(step);
+  };
 
-        // 过滤出 entities 里包含 `switch.` 开头的 devices
-        const filteredDevices = devices.filter((device) =>
-          device.entities.some(
-            (entity) => entity.startsWith('switch.') && entity.includes('giot'),
-          ),
-        );
-
-        console.log('获取到的设备信息:', filteredDevices);
-        message.success('成功获取设备信息！');
-      } else {
-        message.error('Home Assistant实例未正确初始化');
-      }
-    } catch (error) {
-      console.error('获取设备信息失败:', error);
-      message.error('获取设备信息失败，请检查连接配置');
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return <KNXEditor />;
+      case 1:
+        return <MiBindEditor />;
+      default:
+        return null;
     }
   };
 
@@ -65,36 +44,25 @@ function SetupPage(): JSX.Element {
 
             <Steps
               direction="vertical"
+              current={currentStep}
+              onChange={handleStepChange}
               items={[
                 {
                   icon: <SettingOutlined />,
-                  title: '配置 KNX 节点',
-                  description: '编辑 KNX 设备配置',
+                  title: '配置 KNX 开关',
+                  description: '把开发商的开关接入 HA 盒子',
                 },
                 {
                   icon: <WifiOutlined />,
-                  title: '获取设备信息',
-                  description: (
-                    <Space>
-                      配置完 KNX 设备 和 小米插件后执行
-                      <Button
-                        type="primary"
-                        size="small"
-                        onClick={handleGetDevices}
-                      >
-                        获取
-                      </Button>
-                    </Space>
-                  ),
+                  title: '配置小米设备',
+                  description: '绑定小米智能设备和 KNX 开关的关系',
                 },
               ]}
             />
           </Card>
         </Col>
         <Col span={12}>
-          <Card title="KNX 设备配置">
-            <KNXEditor />
-          </Card>
+          <Card title="配置详情">{renderStepContent()}</Card>
         </Col>
       </Row>
     </div>

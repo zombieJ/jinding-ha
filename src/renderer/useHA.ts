@@ -3,13 +3,14 @@ import React from 'react';
 /** A control of Home Assistant */
 export interface Instance {
   login: (host: string, token: string) => Promise<void>;
-  getDevices: () => Promise<
-    {
-      deviceId: string;
-      name: string;
-      entities: string[];
-    }[]
-  >;
+  getDevices: () => Promise<HADevice[]>;
+}
+
+/** Home Assistant Device */
+export interface HADevice {
+  deviceId: string;
+  name: string;
+  entities: string[];
 }
 
 export default function useHA(): Instance {

@@ -3,11 +3,10 @@ import { App as AntdApp } from 'antd';
 import './App.css';
 import HomePage from './HomePage';
 import SetupPage from './SetupPage';
-import React from 'react';
 import useHA, { HAContext } from './useHA';
 
 export default function App() {
- const instance =  useHA();
+  const instance = useHA();
 
   return (
     <HAContext.Provider value={instance}>

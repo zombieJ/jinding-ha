@@ -16,6 +16,8 @@ module.exports = {
     'consistent-return': 'off',
     'react/function-component-definition': 'off',
     'react/jsx-props-no-spreading': 'off',
+    'react-hooks/exhaustive-deps': 'off',
+    'react/no-array-index-key': 'off',
   },
   parserOptions: {
     ecmaVersion: 2022,
