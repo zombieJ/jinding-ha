@@ -4,7 +4,15 @@ import React from 'react';
 export interface Instance {
   login: (host: string, token: string) => Promise<void>;
   getDevices: () => Promise<HADevice[]>;
-  getEntities: () => Promise<any>;
+  getEntities: () => Promise<HAEntity[]>;
+}
+
+export interface HAEntity {
+  entity_id: string;
+  state: string;
+  attributes: {
+    friendly_name: string;
+  };
 }
 
 /** Home Assistant Device */

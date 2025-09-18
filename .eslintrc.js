@@ -1,6 +1,6 @@
 module.exports = {
   extends: 'erb',
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'promise'],
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
     'import/no-extraneous-dependencies': 'off',
@@ -20,6 +20,8 @@ module.exports = {
     'react-hooks/exhaustive-deps': 'off',
     'react/no-array-index-key': 'off',
     'react/require-default-props': 'off',
+    'react/destructuring-assignment': 'off',
+    'promise/always-return': 'off',
   },
   parserOptions: {
     ecmaVersion: 2022,

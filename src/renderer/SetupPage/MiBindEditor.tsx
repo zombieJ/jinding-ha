@@ -23,10 +23,10 @@ const MiBindEditor: React.FC<MiBindEditorProps> = ({ knxItems }) => {
         const nextDevices = await haInstance.getDevices();
 
         // 过滤出 entities 里包含 `switch.` 开头的 devices
-        const filteredDevices = nextDevices.filter((device) =>
-          device.entities.some(
-            (entity) => entity.startsWith('switch.') && entity.includes('giot'),
-          ),
+        const filteredDevices = nextDevices.filter(
+          (device) =>
+            device.entities.some((entity) => entity.startsWith('switch.')) &&
+            device.entities.some((entity) => entity.includes('giot')),
         );
 
         console.log('获取到的设备信息:', filteredDevices);
