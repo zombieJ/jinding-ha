@@ -130,9 +130,9 @@ const KNXEditor: React.FC<KNXEditorProps> = ({ onKNXChange }) => {
         </Form.List>
 
         {/* 生成 KNX 配置 */}
-        <Divider />
+        <Divider>configuration.yaml</Divider>
         <Alert
-          message="将数据直接贴到 configuration.yaml 文件里，重新加载配置首页就会显示房间开关"
+          message="将数据直接贴到 configuration.yaml 文件最后面（不是覆盖！），重新加载配置首页就会显示房间开关"
           type="info"
         />
         <Form.Item noStyle shouldUpdate>

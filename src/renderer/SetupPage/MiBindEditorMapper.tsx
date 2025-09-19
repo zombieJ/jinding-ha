@@ -7,7 +7,17 @@ import React, {
 } from 'react';
 import { HAContext, HADevice, HAEntity } from '../useHA';
 import { KNXItem } from './types';
-import { Alert, Form, Input, Button, Flex, Divider, Select } from 'antd';
+import {
+  Alert,
+  Form,
+  Input,
+  Button,
+  Flex,
+  Divider,
+  Select,
+  Spin,
+  Typography,
+} from 'antd';
 
 interface EntityItem {
   entityId: string;
@@ -128,25 +138,46 @@ const MiBindEditorMapper: React.FC<MiBindEditorMapperProps> = ({ devices }) => {
         type="info"
       />
 
-      <Form form={form} layout="vertical">
-        <Form.List name="miEntities">
-          {(fields, { add, remove }) => (
-            <>
-              {fields.map(({ key, name }) => (
-                <Flex key={key} vertical gap="small">
-                  <Divider size="small" />
-                  <Form.Item noStyle name={[name, 'entityId']}>
-                    <Title entities={entities} />
-                  </Form.Item>
-                  <Form.Item noStyle name={[name, 'knxItemId']}>
-                    <Select options={selectOptions} />
-                  </Form.Item>
-                </Flex>
-              ))}
-            </>
-          )}
-        </Form.List>
-      </Form>
+      {lightEntityList.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <Spin tip="加载中..." />
+        </div>
+      ) : (
+        <Form form={form} layout="vertical">
+          <Form.List name="miEntities">
+            {(fields) => (
+              <>
+                {fields.map(({ key, name }) => (
+                  <Flex key={key} vertical gap="small">
+                    <Divider size="small" />
+                    <Form.Item noStyle name={[name, 'entityId']}>
+                      <Title entities={entities} />
+                    </Form.Item>
+                    <Form.Item noStyle name={[name, 'knxItemId']}>
+                      <Select options={selectOptions} />
+                    </Form.Item>
+                  </Flex>
+                ))}
+              </>
+            )}
+          </Form.List>
+
+          {/* 生成脚本 */}
+          <Divider>automations.yaml</Divider>
+          <Alert
+            message="覆盖 automations.yaml（如果你自己编辑了自动化可以备份，没有就覆盖），重新加载配置即实现双向绑定"
+            type="info"
+          />
+
+          <Form.Item noStyle shouldUpdate>
+            {() => {
+              const list = form.getFieldValue('miEntities');
+
+              return <Typography></Typography>;
+            }}
+          </Form.Item>
+        </Form>
+      )}
     </div>
   );
 };
