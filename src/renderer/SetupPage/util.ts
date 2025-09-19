@@ -1,3 +1,5 @@
+import { EntityItem } from './MiBindEditorMapper';
+
 // KNX 开 -> 小米 开
 export const OPEN_KNX_2_MI = `
 - id: '【编号】'
@@ -139,56 +141,83 @@ export const generateScript = (
   return ret;
 };
 
-// TODO: ref this code to realize batchGenScripts
-// allValues.items.forEach((item: any) => {
-//         if (item && item.knxSwitchId && item.miSwitchId) {
-//           // 添加备注行，注明是哪个 KNX 和小米开关的
-//           scripts.push(
-//             `##### KNX: ${item.knxSwitchName || "默认房间"} (${
-//               item.knxSwitchId
-//             }) -> 小米: ${item.miSwitchName || "默认房间"} (${
-//               item.miDeviceId
-//             }.${item.miSwitchId})`
-//           );
-//           scripts.push(
-//             generateScript(
-//               OPEN_KNX_2_MI,
-//               item.knxSwitchName || "默认房间",
-//               item.knxSwitchId,
-//               item.miDeviceId,
-//               item.miSwitchId,
-//               idOffset++,
-//               now
-//             ),
-//             generateScript(
-//               CLOSE_KNX_2_MI,
-//               item.knxSwitchName || "默认房间",
-//               item.knxSwitchId,
-//               item.miDeviceId,
-//               item.miSwitchId,
-//               idOffset++,
-//               now
-//             ),
-//             generateScript(
-//               OPEN_MI_2_KNX,
-//               item.knxSwitchName || "默认房间",
-//               item.knxSwitchId,
-//               item.miDeviceId,
-//               item.miSwitchId,
-//               idOffset++,
-//               now
-//             ),
-//             generateScript(
-//               CLOSE_MI_2_KNX,
-//               item.knxSwitchName || "默认房间",
-//               item.knxSwitchId,
-//               item.miDeviceId,
-//               item.miSwitchId,
-//               idOffset++,
-//               now
-//             )
-//           );
-//         }
-//       });
+export const batchGenScripts = (
+  entities: Record<string, EntityItem>,
+  knxDescList: { label: string; value: string }[],
+  itemList: {
+    entityId: string;
+    knxItemId: string;
+  }[] = [],
+) => {
+  const scripts: string[] = [];
+  let idOffset = 0;
+  const now = Date.now();
 
-export const batchGenScripts = () => {};
+  // Add the batch sync script
+  scripts.push(BATCH_SYNC);
+
+  itemList.forEach((item) => {
+    const entity = entities[item.entityId];
+    if (entity) {
+      const { entityId: miSwitchId, knxItemId: knxSwitchId } = item;
+      const {
+        deviceId: miDeviceId,
+        // deviceName: miDeviceName,
+        entity: { attributes: { friendly_name: miSwitchName } = {} } = {},
+      } = entity;
+
+      const knxName =
+        knxDescList.find((item) => item.value === knxSwitchId)?.label ||
+        '默认房间';
+
+      // 添加备注行，注明是哪个 KNX 和小米开关的
+      scripts.push(
+        `##### KNX: ${knxName} (${
+          knxSwitchId
+        }) -> 小米: ${miSwitchName || '默认房间'} (${
+          miDeviceId
+        } > ${miSwitchId})`,
+      );
+      scripts.push(
+        generateScript(
+          OPEN_KNX_2_MI,
+          knxName,
+          knxSwitchId,
+          miDeviceId,
+          miSwitchId,
+          idOffset++,
+          now,
+        ),
+        generateScript(
+          CLOSE_KNX_2_MI,
+          knxName,
+          knxSwitchId,
+          miDeviceId,
+          miSwitchId,
+          idOffset++,
+          now,
+        ),
+        generateScript(
+          OPEN_MI_2_KNX,
+          knxName,
+          knxSwitchId,
+          miDeviceId,
+          miSwitchId,
+          idOffset++,
+          now,
+        ),
+        generateScript(
+          CLOSE_MI_2_KNX,
+          knxName,
+          knxSwitchId,
+          miDeviceId,
+          miSwitchId,
+          idOffset++,
+          now,
+        ),
+      );
+    }
+  });
+
+  return scripts.join('\n');
+};

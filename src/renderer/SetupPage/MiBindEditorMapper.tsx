@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { HAContext, HADevice, HAEntity } from '../useHA';
 import { KNXItem } from './types';
+import { batchGenScripts } from './util';
 import {
   Alert,
   Form,
@@ -19,7 +20,7 @@ import {
   Typography,
 } from 'antd';
 
-interface EntityItem {
+export interface EntityItem {
   entityId: string;
   deviceId: string;
   deviceName: string;
@@ -171,9 +172,19 @@ const MiBindEditorMapper: React.FC<MiBindEditorMapperProps> = ({ devices }) => {
 
           <Form.Item noStyle shouldUpdate>
             {() => {
-              const list = form.getFieldValue('miEntities');
+              const list = (
+                (form.getFieldValue('miEntities') || []) as {
+                  entityId: string;
+                  knxItemId: string;
+                }[]
+              ).filter((item) => item.knxItemId);
 
-              return <Typography></Typography>;
+              return (
+                <Input.TextArea
+                  value={batchGenScripts(entities, selectOptions, list)}
+                  rows={10}
+                />
+              );
             }}
           </Form.Item>
         </Form>
