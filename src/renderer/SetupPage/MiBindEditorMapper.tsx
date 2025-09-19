@@ -117,11 +117,34 @@ const MiBindEditorMapper: React.FC<MiBindEditorMapperProps> = ({ devices }) => {
     // 将 entityList 数据设置到表单中
     const keys = Object.keys(entities);
     if (keys.length > 0) {
-      form.setFieldsValue({
-        miEntities: keys.map((key) => ({
-          entityId: key,
-        })),
-      });
+      // 首先尝试从localStorage恢复数据
+      const savedData = localStorage.getItem('miBindMapper');
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+          // 只恢复knxItemId映射，保持entityId不变
+          const miEntities = keys.map((key) => ({
+            entityId: key,
+            knxItemId: parsedData[key] || undefined,
+          }));
+          form.setFieldsValue({ miEntities });
+        } catch (e) {
+          console.error('解析 localStorage 数据失败:', e);
+          // 如果解析失败，使用默认值
+          form.setFieldsValue({
+            miEntities: keys.map((key) => ({
+              entityId: key,
+            })),
+          });
+        }
+      } else {
+        // 没有保存的数据，使用默认值
+        form.setFieldsValue({
+          miEntities: keys.map((key) => ({
+            entityId: key,
+          })),
+        });
+      }
     }
   }, [entities, form]);
 
@@ -144,7 +167,24 @@ const MiBindEditorMapper: React.FC<MiBindEditorMapperProps> = ({ devices }) => {
           <Spin tip="加载中..." />
         </div>
       ) : (
-        <Form form={form} layout="vertical">
+        <Form
+          form={form}
+          layout="vertical"
+          onValuesChange={(_, values) => {
+            if (values.miEntities) {
+              // 只保存entityId到knxItemId的映射
+              const mapping: Record<string, string> = {};
+              values.miEntities.forEach(
+                (item: { entityId: string; knxItemId: string }) => {
+                  if (item.entityId && item.knxItemId) {
+                    mapping[item.entityId] = item.knxItemId;
+                  }
+                },
+              );
+              localStorage.setItem('miBindMapper', JSON.stringify(mapping));
+            }
+          }}
+        >
           <Form.List name="miEntities">
             {(fields) => (
               <>
@@ -155,7 +195,11 @@ const MiBindEditorMapper: React.FC<MiBindEditorMapperProps> = ({ devices }) => {
                       <Title entities={entities} />
                     </Form.Item>
                     <Form.Item noStyle name={[name, 'knxItemId']}>
-                      <Select options={selectOptions} />
+                      <Select
+                        options={selectOptions}
+                        showSearch
+                        optionFilterProp="label"
+                      />
                     </Form.Item>
                   </Flex>
                 ))}
