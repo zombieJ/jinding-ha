@@ -227,6 +227,7 @@ const MiBindEditorMapper: React.FC<MiBindEditorMapperProps> = ({ devices }) => {
                 <Input.TextArea
                   value={batchGenScripts(entities, selectOptions, list)}
                   rows={10}
+                  style={{ marginTop: 16 }}
                 />
               );
             }}
